@@ -30,14 +30,14 @@ This app simply runs in place to redirect the traffic to new location, expecily 
    ```
    moved --addr 0.0.0.0:8080 --location https://www.google.com -c 308
    ```
-### Docker container
+## Docker container
 1. Build the container.
    ```
    docker build -t moved .
    ```
 1. Run the container
    ```
-   docker run --rm moved  moved --location https://maps.google.com
+   docker run -p 8080:8080 --rm moved  moved --location https://maps.google.com
    [info] returned http code: '301'
    [info] new location https://maps.google.com
    Server running on http://127.0.0.1:8080
