@@ -17,7 +17,7 @@ This app simply runs in place to redirect the traffic to new location, expecily 
 
 ### Arguments
 1. `--addr`, `-a` the listen address for this app. The default value is `127.0.0.1:8080`. This won't accept the remote connection. for remote connection please use the public IP of the machine, or listen on `0.0.0.0:8080`.
-1. `--code`, `-c` the http return code to the client. The default value is `301` - `Moved Permanently`. You may also do `308`- `Permanent Redirect`. Or any other customized code.
+1. `--code`, `-c` the http return code to the client. The default value is `301` - `Moved Permanently`. You may also do `308`- `Permanent Redirect`. Or any other customized code. When you are behind an proxy, you'd like to set the `--code 200`, So the proxy won't be surprised by return code and panic an `502` to browser.
 1. `--location`, `-l` the target URL that the traffic eventually redirects to.
 1. `--message`, `-l` the optional message that returns to the browser or client.
 
@@ -29,6 +29,10 @@ This app simply runs in place to redirect the traffic to new location, expecily 
 1. Retruns HTTP 308 Permanent Redirect:
    ```
    moved --addr 0.0.0.0:8080 --location https://www.google.com -c 308
+   ```
+1. Returns HTTP 200 refresh by client and redirect:
+   ```
+   moved --addr 0.0.0.0:8080 --location https://www.google.com -c 200
    ```
 ## Docker container
 1. Build the container.

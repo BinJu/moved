@@ -46,19 +46,14 @@ fn handle_connection(mut stream: TcpStream, args: &Cli) {
             match request_line_result {
                 Ok(request_line) => {
                     println!("Received request: {}", request_line);
-                    //
-                    // Formulate a proper plain-text HTTP response
-                    let status_line = format!("HTTP/1.1 {} Moved Permanently", args.code);
-                    let location = format!("Location: {}", args.location);
-                    let contents = if args.message.is_empty() {format!("This app has to moved to new location: {}", args.location) } else { args.message.clone() };
-                    let length = contents.len();
 
-                    let response = format!(
-                        "{status_line}\r\n{location}\r\nContent-Length: {length}\r\nContent-Type: text/plain\r\n\r\n{contents}"
-                    );
-
+                    let resp = if args.code == 200 {
+                        refresh_resp(&args)
+                    } else {
+                        moved_resp(&args)
+                    };
                     // Send the response back to the client
-                    stream.write_all(response.as_bytes()).unwrap();
+                    stream.write_all(resp.as_bytes()).unwrap();
                 },
                 Err(err) => {
                     println!("Received error: {}", err);
@@ -68,4 +63,28 @@ fn handle_connection(mut stream: TcpStream, args: &Cli) {
         },
         None => {}
     }
+}
+
+fn refresh_resp(args: &Cli) -> String {
+    let resp_body = if args.message.is_empty() {
+        format!("<head><meta http-equiv=\"Refresh\" content=\"0; URL={}/\"></head>", args.location)
+    } else {
+        args.message.clone()
+    };
+    let len = resp_body.len();
+    format!("HTTP/1.1 200 OK\r\nContent-Length:{}\r\nContent-Type: text/html\r\n\r\n{}", len, resp_body)
+}
+
+fn moved_resp(args: &Cli) -> String {
+    // Formulate a proper plain-text HTTP response
+    let status_line = format!("HTTP/1.1 {} Moved Permanently", args.code);
+    let location = format!("Location: {}", args.location);
+    let contents = if args.message.is_empty() {
+        format!("This app has to moved to new location: {}", args.location)
+    } else {
+        args.message.clone()
+    };
+    let length = contents.len();
+
+    format!("{status_line}\r\n{location}\r\nContent-Length: {length}\r\nContent-Type: text/plain\r\n\r\n{contents}")
 }
